@@ -1,0 +1,92 @@
+/* Component-specific styles can be added here */
+
+/* Square button styles with icon above text */
+.square-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.square-btn i {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.square-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.square-btn:active {
+  transform: translateY(0);
+}
+
+/* Name input field styles */
+.name-input {
+  font-size: 32px !important;
+  padding: 12px 16px !important;
+  height: auto !important;
+  min-height: 60px;
+  border-radius: 12px !important;
+  border: 2px solid #dee2e6 !important;
+  transition: all 0.2s ease;
+}
+
+.name-input:focus {
+  border-color: #dee2e6 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.name-input.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .square-btn {
+    width: 100px;
+    height: 100px;
+    font-size: 14px;
+  }
+
+  .square-btn i {
+    font-size: 24px;
+  }
+
+  .name-input {
+    font-size: 26px !important;
+    padding: 8px 12px !important;
+    min-height: 50px;
+  }
+}
+
+@media (min-width: 768px) {
+  .square-btn {
+    width: 140px;
+    height: 140px;
+    font-size: 18px;
+  }
+
+  .square-btn i {
+    font-size: 32px;
+  }
+
+  .name-input {
+    font-size: 36px !important;
+    padding: 16px 20px !important;
+    min-height: 70px;
+  }
+}
