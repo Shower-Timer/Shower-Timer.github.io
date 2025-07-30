@@ -112,7 +112,7 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
-    'space-before-function-paren': ['error', 'always'],
+    'space-before-function-paren': 'off', // Disabled in favor of Prettier
     'space-before-blocks': 'error',
     'keyword-spacing': 'error',
     'space-infix-ops': 'error',

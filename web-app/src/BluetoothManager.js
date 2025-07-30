@@ -1,5 +1,5 @@
 class BluetoothManager {
-  constructor () {
+  constructor() {
     this.device = null;
     this.server = null;
     this.service = null;
@@ -12,7 +12,7 @@ class BluetoothManager {
     this.CHARACTERISTIC_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb';
   }
 
-  async connect () {
+  async connect() {
     if (!this.isSupported) {
       throw new Error('Bluetooth not supported in this browser');
     }
@@ -68,7 +68,7 @@ class BluetoothManager {
     }
   }
 
-  async disconnect () {
+  async disconnect() {
     if (this.device && this.device.gatt.connected) {
       await this.device.gatt.disconnect();
     }
@@ -81,14 +81,14 @@ class BluetoothManager {
     console.log('Bluetooth disconnected');
   }
 
-  onDisconnected () {
+  onDisconnected() {
     // eslint-disable-next-line no-console
     console.log('Bluetooth device disconnected');
     this.isConnected = false;
     // You can add reconnection logic here if needed
   }
 
-  async sendCommand (command, data = {}) {
+  async sendCommand(command, data = {}) {
     if (!this.isConnected || !this.characteristic) {
       throw new Error('Bluetooth not connected');
     }
@@ -115,23 +115,23 @@ class BluetoothManager {
   }
 
   // Timer-specific commands
-  async startTimer (minutes, seconds) {
+  async startTimer(minutes, seconds) {
     await this.sendCommand('startTimer', { minutes, seconds });
   }
 
-  async stopTimer () {
+  async stopTimer() {
     await this.sendCommand('stopTimer');
   }
 
-  async pauseTimer () {
+  async pauseTimer() {
     await this.sendCommand('pauseTimer');
   }
 
-  async resumeTimer () {
+  async resumeTimer() {
     await this.sendCommand('resumeTimer');
   }
 
-  async setCurrentTime () {
+  async setCurrentTime() {
     const now = new Date();
     await this.sendCommand('setTime', {
       hours: now.getHours(),
@@ -140,12 +140,12 @@ class BluetoothManager {
     });
   }
 
-  async setBrightness (brightness) {
+  async setBrightness(brightness) {
     await this.sendCommand('setBrightness', { brightness });
   }
 
   // Get connection status
-  getConnectionStatus () {
+  getConnectionStatus() {
     return {
       isSupported: this.isSupported,
       isConnected: this.isConnected,
@@ -154,4 +154,4 @@ class BluetoothManager {
   }
 }
 
-export default BluetoothManager; 
+export default BluetoothManager;

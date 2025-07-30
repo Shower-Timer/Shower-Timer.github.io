@@ -33,18 +33,41 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug checkout
+        run: |
+          echo "🔍 Debugging checkout process..."
+          echo "📍 Working directory: $(pwd)"
+          echo "📁 Repository root contents:"
+          ls -la
+          echo ""
+          echo "🔍 Checking for key files:"
+          [ -f "package.json" ] && echo "✅ package.json found" || echo "❌ package.json not found"
+          [ -d "src" ] && echo "✅ src directory found" || echo "❌ src directory not found"
+          [ -d "public" ] && echo "✅ public directory found" || echo "❌ public directory not found"
+
       - name: Verify web-app folder structure
         run: |
           echo "🔍 Verifying web-app folder structure..."
-          if [ -d "web-app" ]; then
-            echo "✅ web-app folder found"
-            ls -la web-app/
-          else
-            echo "❌ web-app folder not found"
-            exit 1
-          fi
-          echo "📁 Repository structure:"
+          echo "📍 Current working directory: $(pwd)"
+          echo "📁 Current directory contents:"
           ls -la
+          echo ""
+          echo "🔍 Since we're in web-app directory, checking current contents..."
+          if [ -f "package.json" ]; then
+            echo "✅ package.json found - we're in the right place"
+            echo "📂 Current directory contents:"
+            ls -la
+          else
+            echo "❌ package.json not found"
+            echo "🔍 Checking if we need to go up a directory..."
+            if [ -f "../web-app/package.json" ]; then
+              echo "✅ Found web-app in parent directory"
+              ls -la ../web-app/
+            else
+              echo "❌ web-app not found in expected locations"
+              exit 1
+            fi
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
