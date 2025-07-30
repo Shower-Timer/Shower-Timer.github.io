@@ -1,14 +1,16 @@
-name: Deploy to GitHub Pages
+name: Deploy Web App to GitHub Pages
 
 on:
   push:
     branches: [ main, master ]
     paths:
       - 'web-app/**'
+      - '.github/workflows/deploy.yml'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'web-app/**'
+      - '.github/workflows/deploy.yml'
 
 permissions:
   contents: read
@@ -20,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
+  # Build job - Only processes web-app folder
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -28,8 +30,24 @@ jobs:
         working-directory: ./web-app
     
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Only checkout web-app related files to save time and space
+          sparse-checkout: |
+            web-app/
+            .github/workflows/
+            .gitignore
+            README.md
+            DEPLOYMENT.md
+
+      - name: Verify web-app folder structure
+        run: |
+          echo "🔍 Verifying web-app folder structure..."
+          ls -la web-app/
+          echo "✅ web-app folder verified"
+          echo "📁 Other folders (ignored):"
+          ls -la | grep -E "(android-app|bluetooth-arduino)" || echo "No other app folders found"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -49,6 +67,12 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "📦 Build output contents:"
+          ls -la build/
+          echo "✅ Build verification complete"
 
       - name: Upload build artifacts
         uses: actions/upload-pages-artifact@v3
