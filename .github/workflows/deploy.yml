@@ -32,22 +32,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          # Only checkout web-app related files to save time and space
-          sparse-checkout: |
-            web-app/
-            .github/workflows/
-            .gitignore
-            README.md
-            DEPLOYMENT.md
 
       - name: Verify web-app folder structure
         run: |
           echo "🔍 Verifying web-app folder structure..."
-          ls -la web-app/
-          echo "✅ web-app folder verified"
-          echo "📁 Other folders (ignored):"
-          ls -la | grep -E "(android-app|bluetooth-arduino)" || echo "No other app folders found"
+          if [ -d "web-app" ]; then
+            echo "✅ web-app folder found"
+            ls -la web-app/
+          else
+            echo "❌ web-app folder not found"
+            exit 1
+          fi
+          echo "📁 Repository structure:"
+          ls -la
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
