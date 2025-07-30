@@ -69,6 +69,7 @@ const App = () => {
   const [showerHistory, setShowerHistory] = useState(() => getInitialHistory());
   const [lastShowerEndTime, setLastShowerEndTime] = useState(null);
   const [startTime, setStartTime] = useState(null);
+  const [startButtonPressed, setStartButtonPressed] = useState(false);
 
   const timerRef = useRef(null);
   const alarmIntervalRef = useRef(null);
@@ -169,9 +170,11 @@ const App = () => {
     setName('');
     setStartTime(null);
     timerCompletedRef.current = false;
+    setStartButtonPressed(false);
   }, [stopAllAudio]);
 
   const startTimer = useCallback(() => {
+    setStartButtonPressed(true);
     if (!isRunning && name.trim()) {
       const duration = parseFloat(showerDuration);
       const initialTime = duration < 1 ? Math.ceil(duration * 60) : duration * 60;
@@ -279,9 +282,17 @@ const App = () => {
   }, [isRunning, isPaused, timeLeft, name, startTime, lastShowerEndTime, startAlarm]);
 
   // Memoized input handlers
-  const handleNameChange = useCallback(event => {
-    setName(event.target.value.toUpperCase());
-  }, []);
+  const handleNameChange = useCallback(
+    event => {
+      const newName = event.target.value.toUpperCase();
+      setName(newName);
+      // Clear validation state if user starts typing a valid name
+      if (newName.trim() && startButtonPressed) {
+        setStartButtonPressed(false);
+      }
+    },
+    [startButtonPressed],
+  );
   const handleShowerDurationChange = useCallback(event => {
     setShowerDuration(parseFloat(event.target.value));
   }, []);
@@ -325,29 +336,24 @@ const App = () => {
 
   return (
     <div className='App'>
-      {/* Header */}
-      <div className='header d-flex justify-content-between align-items-center'>
-        <div className='flex-grow-1 text-center'>
-          <h1 className='mb-0'>TRM Shower Timer</h1>
-        </div>
-        <div>
-          <i
-            className='fas fa-history settings-icon me-3'
-            role='button'
-            tabIndex={0}
-            onClick={handleShowHistory}
-            onKeyDown={handleKeyDownHistory}
-            aria-label='Show History'
-          ></i>
-          <i
-            className='fas fa-cog settings-icon'
-            role='button'
-            tabIndex={0}
-            onClick={handleShowSettings}
-            onKeyDown={handleKeyDownSettings}
-            aria-label='Show Settings'
-          ></i>
-        </div>
+      {/* Top Right Icons */}
+      <div className='top-right-icons'>
+        <i
+          className='fas fa-history settings-icon me-3'
+          role='button'
+          tabIndex={0}
+          onClick={handleShowHistory}
+          onKeyDown={handleKeyDownHistory}
+          aria-label='Show History'
+        ></i>
+        <i
+          className='fas fa-cog settings-icon'
+          role='button'
+          tabIndex={0}
+          onClick={handleShowSettings}
+          onKeyDown={handleKeyDownSettings}
+          aria-label='Show Settings'
+        ></i>
       </div>
 
       {/* Main Content */}
@@ -358,7 +364,7 @@ const App = () => {
             <div className='mb-3'>
               <input
                 type='text'
-                className={`form-control form-control-lg text-center name-input ${!name.trim() && isRunning ? 'is-invalid' : ''}`}
+                className={`form-control form-control-lg text-center name-input ${!name.trim() && startButtonPressed ? 'is-invalid' : ''}`}
                 value={name}
                 onChange={handleNameChange}
                 placeholder='Enter Name'

@@ -3,8 +3,11 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # Production builds
+web-app/build/
+web-app/dist/
 build/
 dist/
 
@@ -15,7 +18,7 @@ dist/
 .env.test.local
 .env.production.local
 
-# IDE and editor files
+# IDE and Editor files
 .vscode/
 .idea/
 *.swp
@@ -57,12 +60,6 @@ jspm_packages/
 # Optional eslint cache
 .eslintcache
 
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
 # Optional REPL history
 .node_repl_history
 
@@ -76,30 +73,66 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Next.js build output
+# next.js build output
 .next
 
-# Nuxt.js build / generate output
+# nuxt.js build output
 .nuxt
 
-# Gatsby files
-.cache/
-public
+# vuepress build output
+.vuepress/dist
 
-# Storybook build outputs
-.out
-.storybook-out
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
 
 # Temporary folders
 tmp/
 temp/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw? 
+# Android specific (for android-app folder)
+android-app/.gradle/
+android-app/build/
+android-app/local.properties
+android-app/.idea/
+android-app/*.iml
+android-app/captures/
+android-app/gradle/
+android-app/gradlew
+android-app/gradlew.bat
+android-app/local.properties
+android-app/.externalNativeBuild
+android-app/.cxx
+android-app/release/
+
+# React Native specific (for android-app folder)
+android-app/node_modules/
+android-app/npm-debug.log*
+android-app/yarn-debug.log*
+android-app/yarn-error.log*
+android-app/metro.config.js
+android-app/react-native.config.js
+
+# Arduino specific (for bluetooth-arduino folder)
+bluetooth-arduino/*.hex
+bluetooth-arduino/*.elf
+bluetooth-arduino/*.eep
+bluetooth-arduino/*.bin
+bluetooth-arduino/build/
+
+# GitHub Actions artifacts
+.github/actions/artifacts/
+
+# Local development files
+*.local 

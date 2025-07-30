@@ -1,105 +1,236 @@
-# TRM Shower Timer - React Version
+# Shower Timer - Complete Project
 
-A countdown timer application designed for Raspberry Pi 5 with Inland 3.5" TFT LCD Touch Screen Monitor, now built with React.
+A comprehensive shower timer application with web, Android, and Bluetooth integration capabilities.
+
+## Project Structure
+
+This repository contains three main components:
+
+### 🖥️ Web Application (`web-app/`)
+- React-based web application
+- Responsive design for desktop and mobile browsers
+- Local storage for timer history and settings
+- Web Bluetooth API integration for external displays
+
+### 📱 Android Application (`android-app/`)
+- React Native Android app
+- Optimized for tablets
+- Native Android features and performance
+- Bluetooth integration for external displays
+
+### 🔗 Bluetooth Integration (`bluetooth-arduino/`)
+- Arduino code for 7-segment LED display
+- Bluetooth communication protocol
+- Integration with 7-Segment Digital Clock V2 project
+- Wiring diagrams and setup instructions
+
+## Quick Start
+
+### Web Application
+```bash
+cd web-app
+npm install
+npm start
+```
+
+### Android Application
+```bash
+cd android-app
+./setup.sh
+npm start
+npm run android
+```
+
+### Bluetooth Arduino Setup
+```bash
+cd bluetooth-arduino
+# Follow instructions in README.md
+```
 
 ## Features
 
-- Clean, modern interface using Bootstrap 5
-- Configurable shower duration (5 seconds to 55 minutes)
-- Multiple alert sound options
-- Name input for tracking different users
-- Pause/Resume functionality
-- Digital clock-style display
-- Touch-friendly interface
-- Shower history tracking with local storage
-- Early stop functionality
+### Core Timer Functionality
+- **Customizable Duration**: 5 seconds to 55 minutes
+- **Name Input**: Track individual shower sessions
+- **Audio Alerts**: Bell, buzzer, or chime sounds
+- **Timer Controls**: Start, pause, resume, stop, reset
+- **History Tracking**: Detailed shower history with timestamps
 
-## Setup Instructions
+### Platform-Specific Features
+
+#### Web App
+- Responsive Bootstrap design
+- Web Bluetooth API support
+- Local storage persistence
+- Cross-browser compatibility
+
+#### Android App
+- Native Android performance
+- Tablet-optimized UI
+- Native audio playback
+- Offline functionality
+
+#### Bluetooth Integration
+- Real-time clock display
+- Countdown timer display
+- Wireless control
+- Visual feedback and animations
+
+## Technology Stack
+
+### Web Application
+- **Frontend**: React 18, Bootstrap 5
+- **Build Tool**: Create React App
+- **Styling**: CSS3, Bootstrap
+- **Storage**: LocalStorage
+- **Bluetooth**: Web Bluetooth API
+
+### Android Application
+- **Framework**: React Native 0.72
+- **Language**: JavaScript/TypeScript
+- **UI**: React Native components
+- **Storage**: AsyncStorage
+- **Audio**: React Native Sound
+- **Bluetooth**: Native Android Bluetooth
+
+### Arduino Integration
+- **Microcontroller**: Arduino Uno/Nano or ESP8266
+- **Display**: WS2812B LED strip
+- **Communication**: HC-05/HC-06 Bluetooth module
+- **Libraries**: FastLED, ArduinoJson, SoftwareSerial
+
+## Installation
 
 ### Prerequisites
-- Node.js (version 14 or higher)
-- npm or yarn
+- **Node.js** (version 16 or higher)
+- **npm** or **yarn**
+- **Android Studio** (for Android development)
+- **Arduino IDE** (for Arduino development)
+- **Java Development Kit (JDK)** (for Android)
 
-### Installation
+### Web Application Setup
+```bash
+cd web-app
+npm install
+npm start
+```
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Android Application Setup
+```bash
+cd android-app
+./setup.sh
+npm start
+npm run android
+```
 
-2. Add audio files:
-   - Place your audio files in the `public/sounds` directory
-   - Name them as follows:
-     - `bell.mp3`
-     - `buzzer.mp3`
-     - `chime.mp3`
+### Bluetooth Arduino Setup
+1. Install required Arduino libraries:
+   - FastLED
+   - ArduinoJson
+   - SoftwareSerial (built-in)
 
-3. Start the development server:
-   ```bash
-   npm start
-   ```
+2. Upload `ShowerTimerClock.ino` to your Arduino
 
-4. Build for production:
-   ```bash
-   npm run build
-   ```
-
-### For Raspberry Pi Deployment
-
-1. Build the production version:
-   ```bash
-   npm run build
-   ```
-
-2. Copy the `build` folder to your Raspberry Pi's web server directory:
-   ```bash
-   sudo cp -r build/* /var/www/html/
-   ```
-
-3. Ensure your audio files are in the correct location:
-   ```bash
-   sudo mkdir -p /var/www/html/sounds
-   sudo cp sounds/*.mp3 /var/www/html/sounds/
-   ```
+3. Follow wiring instructions in `bluetooth-arduino/WIRING.md`
 
 ## Usage
 
-1. Enter a name in the input field
-2. Click the gear icon to configure:
-   - Select shower duration
-   - Choose alert sound
+### Basic Timer Operation
+1. Enter a name for the shower session
+2. Select desired duration
 3. Click "Start" to begin the timer
-4. Use "Pause" to temporarily stop the timer
-5. Use "End" to stop early and record the time
-6. Use "Reset" to completely stop the timer
-7. Click the history icon to view shower history
+4. Use pause/resume/stop controls as needed
+5. Timer will alert when complete
 
-## Audio Files
+### Bluetooth Display Integration
+1. Connect to Bluetooth module via app
+2. Start timer - display shows countdown
+3. Monitor progress on LED display
+4. Display flashes when timer completes
 
-You'll need to provide your own audio files for the alerts. Place them in the `public/sounds` directory with the following names:
-- `bell.mp3`
-- `buzzer.mp3`
-- `chime.mp3`
-
-## Requirements
-
-- Raspberry Pi 5 (for deployment)
-- Inland 3.5" TFT LCD Touch Screen Monitor (for deployment)
-- Modern web browser
-- Node.js (for development)
+### History and Settings
+- View detailed shower history
+- Configure timer duration and sounds
+- Clear history data
+- Adjust display brightness (Bluetooth)
 
 ## Development
 
-The app is built with:
-- React 18
-- Bootstrap 5
-- Font Awesome icons
-- Local Storage for data persistence
+### Project Structure
+```
+shower-timer/
+├── web-app/                 # React web application
+│   ├── src/                # Source code
+│   ├── public/             # Public assets
+│   ├── package.json        # Dependencies
+│   └── README.md           # Web app documentation
+├── android-app/            # React Native Android app
+│   ├── App.js             # Main app component
+│   ├── android/           # Android project files
+│   ├── package.json       # Dependencies
+│   └── README.md          # Android app documentation
+├── bluetooth-arduino/      # Arduino integration
+│   ├── ShowerTimerClock.ino # Arduino code
+│   ├── WIRING.md          # Wiring instructions
+│   └── README.md          # Arduino documentation
+└── README.md              # This file
+```
+
+### Building for Production
+
+#### Web Application
+```bash
+cd web-app
+npm run build
+```
+
+#### Android Application
+```bash
+cd android-app
+npm run build:android      # Generate APK
+npm run build:android-bundle # Generate App Bundle
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test on all platforms
+5. Submit a pull request
 
 ## Troubleshooting
 
-If you encounter any issues:
-1. Check that all dependencies are installed: `npm install`
-2. Verify audio files are in the correct location
-3. Check browser console for any JavaScript errors
-4. Ensure your browser supports the Web Audio API 
+### Web Application Issues
+- Check browser console for errors
+- Verify Web Bluetooth API support
+- Clear browser cache if needed
+
+### Android Application Issues
+- Check Metro bundler console
+- Verify Android SDK setup
+- Check device/emulator connection
+
+### Bluetooth Integration Issues
+- Verify wiring connections
+- Check Bluetooth pairing
+- Test with Bluetooth terminal app
+- Review Arduino serial monitor
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Based on the [7-Segment Digital Clock V2](https://github.com/leonvandenbeukel/7-Segment-Digital-Clock-V2) project for Arduino integration
+- Uses React and React Native for cross-platform development
+- Bootstrap for responsive web design
+
+## Support
+
+For issues and questions:
+1. Check the troubleshooting sections in each component's README
+2. Review the documentation for each platform
+3. Test with provided examples
+4. Open an issue in the repository 
