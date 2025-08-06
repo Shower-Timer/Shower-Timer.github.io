@@ -636,6 +636,27 @@ const App = () => {
     setAudioSelect(event.target.value);
   }, []);
 
+  // Tab navigation handlers
+  const handleGeneralTab = useCallback(() => setActiveSettingsTab('general'), []);
+  const handleAlertsTab = useCallback(() => setActiveSettingsTab('alerts'), []);
+  const handleAppearanceTab = useCallback(() => setActiveSettingsTab('appearance'), []);
+  const handleBluetoothTab = useCallback(() => setActiveSettingsTab('bluetooth'), []);
+
+  // Warning sound test handler
+  const handleWarningSoundTest = useCallback(() => {
+    try {
+      stopAllAudio();
+      const audio = audioFiles.current[warningSound];
+      if (audio) {
+        audio.play().catch(_error => {
+          // Silently handle audio playing errors
+        });
+      }
+    } catch (_error) {
+      // Silently handle audio errors
+    }
+  }, [stopAllAudio, warningSound]);
+
   // Memoized handlers for JSX props
   const handleKeyDownHistory = useCallback(
     event => {
@@ -831,7 +852,7 @@ const App = () => {
                       id='general-tab'
                       type='button'
                       role='tab'
-                      onClick={() => setActiveSettingsTab('general')}
+                      onClick={handleGeneralTab}
                     >
                       General
                     </button>
@@ -842,7 +863,7 @@ const App = () => {
                       id='alerts-tab'
                       type='button'
                       role='tab'
-                      onClick={() => setActiveSettingsTab('alerts')}
+                      onClick={handleAlertsTab}
                     >
                       Sound
                     </button>
@@ -853,7 +874,7 @@ const App = () => {
                       id='appearance-tab'
                       type='button'
                       role='tab'
-                      onClick={() => setActiveSettingsTab('appearance')}
+                      onClick={handleAppearanceTab}
                     >
                       Appearance
                     </button>
@@ -864,7 +885,7 @@ const App = () => {
                       id='bluetooth-tab'
                       type='button'
                       role='tab'
-                      onClick={() => setActiveSettingsTab('bluetooth')}
+                      onClick={handleBluetoothTab}
                     >
                       Bluetooth
                     </button>
@@ -1018,19 +1039,7 @@ const App = () => {
                         <button
                           className='btn btn-outline-secondary'
                           type='button'
-                          onClick={() => {
-                            try {
-                              stopAllAudio();
-                              const audio = audioFiles.current[warningSound];
-                              if (audio) {
-                                audio.play().catch(_error => {
-                                  // Silently handle audio playing errors
-                                });
-                              }
-                            } catch (_error) {
-                              // Silently handle audio errors
-                            }
-                          }}
+                          onClick={handleWarningSoundTest}
                           disabled={warningPercentage === 'none'}
                         >
                           <i className='fas fa-volume-up'></i> Test Sound
