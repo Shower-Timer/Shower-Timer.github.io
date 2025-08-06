@@ -28,9 +28,7 @@ body {
 
 /* Warning state styles */
 .timer-display.warning-active {
-  animation: warning-pulse 1s ease-in-out infinite alternate;
-  border: 3px solid #ffc107;
-  box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+  /* Removed yellow shadow and border - keeping only the warning indicator */
 }
 
 .warning-indicator {
@@ -51,14 +49,7 @@ body {
   color: #dc3545;
 }
 
-@keyframes warning-pulse {
-  0% {
-    box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
-  }
-  100% {
-    box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
-  }
-}
+
 
 @keyframes warning-bounce {
   0% {

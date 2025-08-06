@@ -185,6 +185,14 @@ const App = () => {
     }
   }, [showerHistory]);
 
+  // Initialize lastShowerEndTime from history
+  useEffect(() => {
+    if (showerHistory.length > 0 && !lastShowerEndTime) {
+      // Set lastShowerEndTime to the most recent shower's end time
+      setLastShowerEndTime(showerHistory[0].endTime);
+    }
+  }, [showerHistory, lastShowerEndTime]);
+
   // Save settings to AsyncStorage
   useEffect(() => {
     const saveSettings = async () => {
@@ -296,6 +304,14 @@ const App = () => {
     warningPlayedRef.current = false;
   }, [stopAllAudio]);
 
+  const pauseAlarm = useCallback(() => {
+    stopAllAudio();
+    if (isRunning) {
+      clearInterval(timerRef.current);
+      setIsPaused(true);
+    }
+  }, [stopAllAudio, isRunning]);
+
   const startTimer = useCallback(() => {
     setStartButtonPressed(true);
     if (!isRunning && name.trim()) {
@@ -307,17 +323,22 @@ const App = () => {
       setStartTime(new Date());
       timerCompletedRef.current = false;
       warningPlayedRef.current = false;
+    } else if (isPaused) {
+      // Resume paused timer
+      setIsPaused(false);
+      setIsRunning(true);
     }
-  }, [isRunning, name, showerDuration]);
+  }, [isRunning, isPaused, name, showerDuration]);
 
   const pauseTimer = useCallback(() => {
+    // Always stop all audio first (alarm sounds, warning sounds, manual sounds)
+    stopAllAudio();
+    
     if (isRunning && !isPaused) {
       clearInterval(timerRef.current);
       setIsPaused(true);
-    } else if (isRunning && isPaused) {
-      setIsPaused(false);
     }
-  }, [isRunning, isPaused]);
+  }, [isRunning, isPaused, stopAllAudio]);
 
   const stopEarly = useCallback(() => {
     clearInterval(timerRef.current);
@@ -325,7 +346,7 @@ const App = () => {
     const actualStartTime = new Date(endTime - (parseFloat(showerDuration) * 60 - timeLeft) * 1000);
     const timeSinceLastShower = lastShowerEndTime
       ? formatTimeDifference(lastShowerEndTime, actualStartTime)
-      : 'First shower';
+      : '-';
 
     const newRecord = {
       name: name,
@@ -342,21 +363,8 @@ const App = () => {
   }, [timeLeft, showerDuration, name, lastShowerEndTime, resetTimer]);
 
   const clearHistory = useCallback(() => {
-    Alert.alert(
-      'Clear History',
-      'Are you sure you want to clear all shower history?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: () => {
-            setShowerHistory([]);
-            AsyncStorage.removeItem('showerHistory');
-          },
-        },
-      ]
-    );
+    setShowerHistory([]);
+    AsyncStorage.removeItem('showerHistory');
   }, []);
 
   const testSound = useCallback(() => {
@@ -375,7 +383,7 @@ const App = () => {
               const endTime = new Date();
               const timeSinceLastShower = lastShowerEndTime
                 ? formatTimeDifference(lastShowerEndTime, startTime)
-                : 'First shower';
+                : '-';
 
               const newRecord = {
                 name: name,
@@ -527,75 +535,65 @@ const App = () => {
 
         {/* Controls */}
         <View style={styles.controlsContainer}>
-          {!isRunning || timeLeft > 0 ? (
-            <>
-              {/* First row: Start, Pause, End */}
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.controlButton, styles.startButton]}
-                  onPress={startTimer}
-                  disabled={isRunning}
-                >
-                  <Icon name="play" size={32} color="white" />
-                  <Text style={styles.buttonText}>Start</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.controlButton, styles.pauseButton]}
-                  onPress={pauseTimer}
-                  disabled={!isRunning}
-                >
-                  <Icon name={isPaused ? "play" : "pause"} size={32} color="white" />
-                  <Text style={styles.buttonText}>{isPaused ? 'Resume' : 'Pause'}</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.controlButton, styles.stopButton]}
-                  onPress={stopEarly}
-                  disabled={!isRunning}
-                >
-                  <Icon name="stop-circle" size={32} color="white" />
-                  <Text style={styles.buttonText}>End</Text>
-                </TouchableOpacity>
-              </View>
+          {/* First row: Start, Pause, Reset Timer */}
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.controlButton, styles.startButton]}
+              onPress={startTimer}
+              disabled={isRunning && !isPaused || (timeLeft === 0 && !isRunning && !name.trim()) || (isPaused && timeLeft === 0)}
+            >
+              <Icon name="play" size={32} color="white" />
+              <Text style={styles.buttonText}>{isPaused && timeLeft > 0 ? 'Resume' : 'Start'}</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.controlButton, styles.pauseButton]}
+              onPress={pauseTimer}
+              disabled={!isRunning}
+            >
+              <Icon name="pause" size={32} color="white" />
+              <Text style={styles.buttonText}>Pause</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.controlButton, styles.resetButton]}
+              onPress={resetTimer}
+              disabled={!isRunning || timeLeft === 0}
+            >
+              <Icon name="undo" size={32} color="white" />
+              <Text style={styles.buttonText}>Reset Timer</Text>
+            </TouchableOpacity>
+          </View>
 
-              {/* Second row: Reset Timer, Sound Alarm, Talk */}
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.controlButton, styles.resetButton]}
-                  onPress={resetTimer}
-                  disabled={!isRunning && timeLeft === 0}
-                >
-                  <Icon name="undo" size={32} color="white" />
-                  <Text style={styles.buttonText}>Reset Timer</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.controlButton, styles.soundButton]}
-                  onPress={playAlertSound}
-                >
-                  <Icon name="volume-up" size={32} color="white" />
-                  <Text style={styles.buttonText}>Sound Alarm</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.controlButton, styles.talkButton]}
-                  onPress={() => Alert.alert('Talk', 'Talk feature coming soon!')}
-                >
-                  <Icon name="microphone" size={32} color="white" />
-                  <Text style={styles.buttonText}>Talk</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
+          {/* Second row: Sound Alarm, Talk, End */}
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.controlButton, styles.soundButton]}
+              onPress={playAlertSound}
+            >
+              <Icon name="volume-up" size={32} color="white" />
+              <Text style={styles.buttonText}>Sound Alarm</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.controlButton, styles.talkButton]}
+              onPress={() => Alert.alert('Talk', 'Talk feature coming soon!')}
+            >
+              <Icon name="microphone" size={32} color="white" />
+              <Text style={styles.buttonText}>Talk</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity
               style={[styles.controlButton, styles.stopButton]}
-              onPress={resetTimer}
+              onPress={stopEarly}
+              disabled={!isRunning}
             >
-              <Icon name="stop" size={32} color="white" />
-              <Text style={styles.buttonText}>Stop Alarm</Text>
+              <Icon name="stop-circle" size={32} color="white" />
+              <Text style={styles.buttonText}>Finished</Text>
             </TouchableOpacity>
-          )}
+          </View>
+
+
         </View>
       </View>
 
@@ -1005,7 +1003,7 @@ const App = () => {
                       {record.completed ? '' : ' (Early)'}
                     </Text>
                     <Text style={styles.historySince}>
-                      Time since last: {record.timeSinceLastShower}
+                      Time Between: {record.timeSinceLastShower}
                     </Text>
                   </View>
                 ))
@@ -1013,19 +1011,21 @@ const App = () => {
             </ScrollView>
             
             <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.clearButton]}
-                onPress={clearHistory}
-              >
-                <Icon name="trash" size={16} color="white" />
-                <Text style={styles.modalButtonText}>Clear History</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={() => setShowHistory(false)}
-              >
-                <Text style={styles.modalButtonText}>Close</Text>
-              </TouchableOpacity>
+              <View style={styles.footerContent}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.clearButton]}
+                  onPress={clearHistory}
+                >
+                  <Icon name="trash" size={16} color="white" />
+                  <Text style={styles.modalButtonText}>Clear History</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setShowHistory(false)}
+                >
+                  <Text style={styles.modalButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -1089,13 +1089,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   warningActive: {
-    borderWidth: 3,
-    borderColor: '#ffc107',
-    shadowColor: '#ffc107',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 8,
+    /* Removed yellow shadow and border - keeping only the warning indicator */
   },
   warningIndicator: {
     position: 'absolute',
@@ -1147,6 +1141,9 @@ const styles = StyleSheet.create({
   },
   stopButton: {
     backgroundColor: '#dc3545',
+  },
+  warningButton: {
+    backgroundColor: '#ffc107',
   },
   soundButton: {
     backgroundColor: '#17a2b8',

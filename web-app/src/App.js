@@ -125,6 +125,14 @@ const App = () => {
     localStorage.setItem('showerHistory', JSON.stringify(showerHistory));
   }, [showerHistory]);
 
+  // Initialize lastShowerEndTime from history
+  useEffect(() => {
+    if (showerHistory.length > 0 && !lastShowerEndTime) {
+      // Set lastShowerEndTime to the most recent shower's end time
+      setLastShowerEndTime(showerHistory[0].endTime);
+    }
+  }, [showerHistory, lastShowerEndTime]);
+
   // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem('showerDuration', showerDuration.toString());
@@ -229,17 +237,22 @@ const App = () => {
       setStartTime(new Date());
       timerCompletedRef.current = false;
       warningPlayedRef.current = false;
+    } else if (isPaused) {
+      // Resume paused timer
+      setIsPaused(false);
+      setIsRunning(true);
     }
-  }, [isRunning, name, showerDuration]);
+  }, [isRunning, isPaused, name, showerDuration]);
 
   const pauseTimer = useCallback(() => {
+    // Always stop all audio first (alarm sounds, warning sounds, manual sounds)
+    stopAllAudio();
+
     if (isRunning && !isPaused) {
       clearInterval(timerRef.current);
       setIsPaused(true);
-    } else if (isRunning && isPaused) {
-      setIsPaused(false);
     }
-  }, [isRunning, isPaused]);
+  }, [isRunning, isPaused, stopAllAudio]);
 
   const stopEarly = useCallback(() => {
     clearInterval(timerRef.current);
@@ -247,7 +260,7 @@ const App = () => {
     const actualStartTime = new Date(endTime - (parseFloat(showerDuration) * 60 - timeLeft) * 1000);
     const timeSinceLastShower = lastShowerEndTime
       ? formatTimeDifference(lastShowerEndTime, actualStartTime)
-      : 'N/A';
+      : '-';
 
     const newEntry = {
       name,
@@ -274,10 +287,8 @@ const App = () => {
   }, [name, showerDuration, timeLeft, lastShowerEndTime, stopAllAudio]);
 
   const clearHistory = useCallback(() => {
-    if (window.confirm('Are you sure you want to clear all shower history?')) {
-      setShowerHistory([]);
-      localStorage.removeItem('showerHistory');
-    }
+    setShowerHistory([]);
+    localStorage.removeItem('showerHistory');
   }, []);
 
   const testSound = useCallback(() => {
@@ -297,18 +308,6 @@ const App = () => {
       );
     }
   }, [audioSelect, stopAllAudio]);
-
-  const handleStopAlarm = useCallback(() => {
-    stopAllAudio();
-    setIsRunning(false);
-    setIsPaused(false);
-    setTimeLeft(0);
-    setName('');
-    setStartTime(null);
-    timerCompletedRef.current = false;
-    warningPlayedRef.current = false;
-    setStartButtonPressed(false);
-  }, [stopAllAudio]);
 
   // New function to reset timer only
   const resetTimer = useCallback(() => {
@@ -579,7 +578,7 @@ const App = () => {
             const endTime = new Date();
             const timeSinceLastShower = lastShowerEndTime
               ? formatTimeDifference(lastShowerEndTime, startTime)
-              : 'N/A';
+              : '-';
 
             const newEntry = {
               name,
@@ -769,53 +768,40 @@ const App = () => {
         <div className='row justify-content-center'>
           <div className='col-md-8 col-lg-6'>
             <div className='controls-container'>
-              {/* First row: Start, Pause, End */}
+              {/* First row: Start, Pause, Reset Timer */}
               <div className='d-flex justify-content-center gap-2 mb-3'>
-                {!isRunning || timeLeft > 0 ? (
-                  <>
-                    <button
-                      className='btn btn-primary btn-lg square-btn'
-                      onClick={startTimer}
-                      disabled={isRunning}
-                    >
-                      <i className='fas fa-play'></i>
-                      <span>Start</span>
-                    </button>
-                    <button
-                      className='btn btn-warning btn-lg square-btn'
-                      onClick={pauseTimer}
-                      disabled={!isRunning}
-                    >
-                      <i className={`fas fa-${isPaused ? 'play' : 'pause'}`}></i>
-                      <span>{isPaused ? 'Resume' : 'Pause'}</span>
-                    </button>
-                    <button
-                      className='btn btn-danger btn-lg square-btn'
-                      onClick={stopEarly}
-                      disabled={!isRunning}
-                    >
-                      <i className='fas fa-stop-circle'></i>
-                      <span>End</span>
-                    </button>
-                  </>
-                ) : (
-                  <button className='btn btn-danger btn-lg square-btn' onClick={handleStopAlarm}>
-                    <i className='fas fa-stop'></i>
-                    <span>Stop Alarm</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Second row: Reset Timer, Sound Alarm, Talk */}
-              <div className='d-flex justify-content-center gap-2'>
+                <button
+                  className='btn btn-primary btn-lg square-btn'
+                  onClick={startTimer}
+                  disabled={
+                    (isRunning && !isPaused) ||
+                    (timeLeft === 0 && !isRunning && !name.trim()) ||
+                    (isPaused && timeLeft === 0)
+                  }
+                >
+                  <i className={`fas fa-${isPaused && timeLeft > 0 ? 'play' : 'play'}`}></i>
+                  <span>{isPaused && timeLeft > 0 ? 'Resume' : 'Start'}</span>
+                </button>
+                <button
+                  className='btn btn-warning btn-lg square-btn'
+                  onClick={pauseTimer}
+                  disabled={!isRunning}
+                >
+                  <i className='fas fa-pause'></i>
+                  <span>Pause</span>
+                </button>
                 <button
                   className='btn btn-secondary btn-lg square-btn'
                   onClick={resetTimer}
-                  disabled={!isRunning && timeLeft === 0}
+                  disabled={!isRunning || timeLeft === 0}
                 >
                   <i className='fas fa-undo'></i>
                   <span>Reset Timer</span>
                 </button>
+              </div>
+
+              {/* Second row: Sound Alarm, Talk, End */}
+              <div className='d-flex justify-content-center gap-2'>
                 <button
                   className='btn btn-info btn-lg square-btn'
                   onMouseDown={playAlarmSound}
@@ -827,6 +813,14 @@ const App = () => {
                 <button className='btn btn-success btn-lg square-btn' onClick={handleTalk}>
                   <i className='fas fa-microphone'></i>
                   <span>Talk</span>
+                </button>
+                <button
+                  className='btn btn-danger btn-lg square-btn'
+                  onClick={stopEarly}
+                  disabled={!isRunning}
+                >
+                  <i className='fas fa-stop-circle'></i>
+                  <span>Finished</span>
                 </button>
               </div>
             </div>
@@ -1226,7 +1220,7 @@ const App = () => {
                         <th>Start Time</th>
                         <th>End Time</th>
                         <th>Duration</th>
-                        <th>Time Since Last Shower</th>
+                        <th>Time Between</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1247,12 +1241,22 @@ const App = () => {
                 </div>
               </div>
               <div className='modal-footer'>
-                <button type='button' className='btn btn-danger' onClick={clearHistory}>
-                  <i className='fas fa-trash'></i> Clear History
-                </button>
-                <button type='button' className='btn btn-secondary' onClick={handleCloseHistory}>
-                  Close
-                </button>
+                <div className='d-flex justify-content-between align-items-center w-100'>
+                  <div>
+                    <button type='button' className='btn btn-danger' onClick={clearHistory}>
+                      <i className='fas fa-trash'></i> Clear History
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      type='button'
+                      className='btn btn-secondary'
+                      onClick={handleCloseHistory}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
