@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   Alert,
   Modal,
   ScrollView,
@@ -19,7 +18,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 // Enable playback in silence mode
 Sound.setCategory('Playback');
 
-const { width, height } = Dimensions.get('window');
+// const { width, height } = Dimensions.get('window'); // Not currently used
 
 // Utility functions
 const formatTimeDifference = (start, end) => {
@@ -37,7 +36,7 @@ const formatTimeDifference = (start, end) => {
   }
 };
 
-const formatDateTime = date => date.toLocaleString();
+const formatDateTime = (date) => date.toLocaleString();
 
 const getInitialValues = async () => {
   try {
@@ -45,13 +44,19 @@ const getInitialValues = async () => {
     const savedAudioSelect = await AsyncStorage.getItem('audioSelect');
     const savedClockBackground = await AsyncStorage.getItem('clockBackground');
     const savedClockDigitColor = await AsyncStorage.getItem('clockDigitColor');
-    const savedClockColorScheme = await AsyncStorage.getItem('clockColorScheme');
+    const savedClockColorScheme = await AsyncStorage.getItem(
+      'clockColorScheme'
+    );
     const savedClockFont = await AsyncStorage.getItem('clockFont');
-    const savedWarningPercentage = await AsyncStorage.getItem('warningPercentage');
+    const savedWarningPercentage = await AsyncStorage.getItem(
+      'warningPercentage'
+    );
     const savedWarningSound = await AsyncStorage.getItem('warningSound');
 
     return {
-      showerDuration: savedShowerDuration ? parseFloat(savedShowerDuration) : 20,
+      showerDuration: savedShowerDuration
+        ? parseFloat(savedShowerDuration)
+        : 20,
       audioSelect: savedAudioSelect || 'bell',
       clockBackground: savedClockBackground || 'black',
       clockDigitColor: savedClockDigitColor || 'green',
@@ -78,7 +83,7 @@ const getInitialHistory = async () => {
   try {
     const savedHistory = await AsyncStorage.getItem('showerHistory');
     if (savedHistory) {
-      const parsed = JSON.parse(savedHistory).map(item => ({
+      const parsed = JSON.parse(savedHistory).map((item) => ({
         ...item,
         startTime: new Date(item.startTime),
         endTime: new Date(item.endTime),
@@ -113,7 +118,7 @@ const App = () => {
   const [warningPercentage, setWarningPercentage] = useState('25');
   const [warningSound, setWarningSound] = useState('bell');
   const [activeSettingsTab, setActiveSettingsTab] = useState('general');
-  const [shouldMarquee, setShouldMarquee] = useState(false);
+  // const [shouldMarquee, setShouldMarquee] = useState(false); // Not used in Android app
 
   const timerRef = useRef(null);
   const alarmIntervalRef = useRef(null);
@@ -128,13 +133,19 @@ const App = () => {
       try {
         audioFiles.current = {
           bell: new Sound('bell.mp3', Sound.MAIN_BUNDLE, (error) => {
-            if (error) console.log('Failed to load bell sound:', error);
+            if (error) {
+              console.log("Failed to load bell sound:", error);
+            }
           }),
           buzzer: new Sound('buzzer.mp3', Sound.MAIN_BUNDLE, (error) => {
-            if (error) console.log('Failed to load buzzer sound:', error);
+            if (error) {
+              console.log("Failed to load buzzer sound:", error);
+            }
           }),
           chime: new Sound('chime.mp3', Sound.MAIN_BUNDLE, (error) => {
-            if (error) console.log('Failed to load chime sound:', error);
+            if (error) {
+              console.log("Failed to load chime sound:", error);
+            }
           }),
         };
       } catch (error) {
@@ -144,8 +155,10 @@ const App = () => {
 
     initAudio();
     return () => {
-      Object.values(audioFiles.current).forEach(audio => {
-        if (audio) audio.release();
+      Object.values(audioFiles.current).forEach((audio) => {
+        if (audio) {
+          audio.release();
+        }
       });
     };
   }, []);
@@ -162,7 +175,7 @@ const App = () => {
       setClockFont(values.clockFont);
       setWarningPercentage(values.warningPercentage);
       setWarningSound(values.warningSound);
-      
+
       const history = await getInitialHistory();
       setShowerHistory(history);
     };
@@ -174,7 +187,10 @@ const App = () => {
   useEffect(() => {
     const saveHistory = async () => {
       try {
-        await AsyncStorage.setItem('showerHistory', JSON.stringify(showerHistory));
+        await AsyncStorage.setItem(
+          'showerHistory',
+          JSON.stringify(showerHistory)
+        );
       } catch (error) {
         console.log('Error saving history:', error);
       }
@@ -211,17 +227,31 @@ const App = () => {
     };
 
     saveSettings();
-  }, [showerDuration, audioSelect, clockBackground, clockDigitColor, clockColorScheme, clockFont, warningPercentage, warningSound]);
+  }, [
+    showerDuration,
+    audioSelect,
+    clockBackground,
+    clockDigitColor,
+    clockColorScheme,
+    clockFont,
+    warningPercentage,
+    warningSound,
+  ]);
 
   const getWarningTime = useCallback(() => {
-    if (warningPercentage === 'none') return 0;
+    if (warningPercentage === 'none') {
+      return 0;
+    }
     const percentage = parseFloat(warningPercentage) / 100;
-    const totalTime = showerDuration < 1 ? Math.ceil(showerDuration * 60) : showerDuration * 60;
+    const totalTime =
+      showerDuration < 1 ? Math.ceil(showerDuration * 60) : showerDuration * 60;
     return Math.floor(totalTime * percentage);
   }, [warningPercentage, showerDuration]);
 
   const shouldShowWarning = useCallback(() => {
-    if (warningPercentage === 'none') return false;
+    if (warningPercentage === 'none') {
+      return false;
+    }
     return isRunning && timeLeft > 0 && timeLeft <= getWarningTime();
   }, [isRunning, timeLeft, getWarningTime, warningPercentage]);
 
@@ -248,7 +278,9 @@ const App = () => {
       } else {
         const minutes = showerDuration;
         const seconds = 0;
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        return `${minutes.toString().padStart(2, '0')}:${seconds
+          .toString()
+          .padStart(2, '0')}`;
       }
     }
 
@@ -257,12 +289,14 @@ const App = () => {
     } else {
       const minutes = Math.floor(timeLeft / 60);
       const seconds = timeLeft % 60;
-      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      return `${minutes.toString().padStart(2, '0')}:${seconds
+        .toString()
+        .padStart(2, '0')}`;
     }
   };
 
   const stopAllAudio = useCallback(() => {
-    Object.values(audioFiles.current).forEach(audio => {
+    Object.values(audioFiles.current).forEach((audio) => {
       if (audio) {
         audio.stop();
       }
@@ -279,7 +313,9 @@ const App = () => {
       const audio = audioFiles.current[audioSelect];
       if (audio) {
         audio.play((success) => {
-          if (!success) console.log('Failed to play sound');
+          if (!success) {
+            console.log("Failed to play sound");
+          }
         });
       }
     } catch (error) {
@@ -304,19 +340,20 @@ const App = () => {
     warningPlayedRef.current = false;
   }, [stopAllAudio]);
 
-  const pauseAlarm = useCallback(() => {
-    stopAllAudio();
-    if (isRunning) {
-      clearInterval(timerRef.current);
-      setIsPaused(true);
-    }
-  }, [stopAllAudio, isRunning]);
+  // const pauseAlarm = useCallback(() => {
+  //   stopAllAudio();
+  //   if (isRunning) {
+  //     clearInterval(timerRef.current);
+  //     setIsPaused(true);
+  //   }
+  // }, [stopAllAudio, isRunning]); // Not used
 
   const startTimer = useCallback(() => {
     setStartButtonPressed(true);
     if (!isRunning && name.trim()) {
       const duration = parseFloat(showerDuration);
-      const initialTime = duration < 1 ? Math.ceil(duration * 60) : duration * 60;
+      const initialTime =
+        duration < 1 ? Math.ceil(duration * 60) : duration * 60;
       setTimeLeft(initialTime);
       setIsRunning(true);
       setIsPaused(false);
@@ -333,7 +370,7 @@ const App = () => {
   const pauseTimer = useCallback(() => {
     // Always stop all audio first (alarm sounds, warning sounds, manual sounds)
     stopAllAudio();
-    
+
     if (isRunning && !isPaused) {
       clearInterval(timerRef.current);
       setIsPaused(true);
@@ -343,7 +380,9 @@ const App = () => {
   const stopEarly = useCallback(() => {
     clearInterval(timerRef.current);
     const endTime = new Date();
-    const actualStartTime = new Date(endTime - (parseFloat(showerDuration) * 60 - timeLeft) * 1000);
+    const actualStartTime = new Date(
+      endTime - (parseFloat(showerDuration) * 60 - timeLeft) * 1000
+    );
     const timeSinceLastShower = lastShowerEndTime
       ? formatTimeDifference(lastShowerEndTime, actualStartTime)
       : '-';
@@ -357,7 +396,7 @@ const App = () => {
       completed: false,
     };
 
-    setShowerHistory(prev => [newRecord, ...prev]);
+    setShowerHistory((prev) => [newRecord, ...prev]);
     setLastShowerEndTime(endTime);
     resetTimer();
   }, [timeLeft, showerDuration, name, lastShowerEndTime, resetTimer]);
@@ -367,15 +406,15 @@ const App = () => {
     AsyncStorage.removeItem('showerHistory');
   }, []);
 
-  const testSound = useCallback(() => {
-    playAlertSound();
-  }, [playAlertSound]);
+  // const testSound = useCallback(() => {
+  //   playAlertSound();
+  // }, [playAlertSound]); // Not used
 
   // Timer effect
   useEffect(() => {
     if (isRunning && !isPaused && timeLeft > 0) {
       timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
+        setTimeLeft((prev) => {
           if (prev <= 1) {
             if (!timerCompletedRef.current) {
               timerCompletedRef.current = true;
@@ -394,18 +433,18 @@ const App = () => {
                 completed: true,
               };
 
-              setShowerHistory(prev => [newRecord, ...prev]);
+              setShowerHistory((prevHistory) => [newRecord, ...prevHistory]);
               setLastShowerEndTime(endTime);
             }
             return 0;
           }
-          
+
           // Check for warning
           if (prev === getWarningTime() && !warningPlayedRef.current) {
             warningPlayedRef.current = true;
             playWarningSound();
           }
-          
+
           return prev - 1;
         });
       }, 1000);
@@ -416,7 +455,17 @@ const App = () => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, timeLeft, startAlarm, name, startTime, lastShowerEndTime, getWarningTime, playWarningSound]);
+  }, [
+    isRunning,
+    isPaused,
+    timeLeft,
+    startAlarm,
+    name,
+    startTime,
+    lastShowerEndTime,
+    getWarningTime,
+    playWarningSound,
+  ]);
 
   const resetSettings = useCallback(async () => {
     setClockBackground('black');
@@ -445,24 +494,44 @@ const App = () => {
 
   const getClockFaceStyles = useCallback(() => {
     const baseStyle = {
-      backgroundColor: clockBackground === 'white' ? '#ffffff' : 
-                      clockBackground === 'black' ? '#000000' :
-                      clockBackground === 'gradient1' ? '#667eea' :
-                      clockBackground === 'gradient2' ? '#f093fb' :
-                      clockBackground === 'gradient3' ? '#4facfe' :
-                      clockBackground === 'ambient' ? '#1a1a1a' : '#000000',
+      backgroundColor:
+        clockBackground === 'white'
+          ? '#ffffff'
+          : clockBackground === 'black'
+          ? '#000000'
+          : clockBackground === 'gradient1'
+          ? '#667eea'
+          : clockBackground === 'gradient2'
+          ? '#f093fb'
+          : clockBackground === 'gradient3'
+          ? '#4facfe'
+          : clockBackground === 'ambient'
+          ? '#1a1a1a'
+          : '#000000',
     };
 
-    const digitColor = clockDigitColor === 'green' ? '#00ff00' :
-                      clockDigitColor === 'white' ? '#ffffff' :
-                      clockDigitColor === 'black' ? '#000000' :
-                      clockDigitColor === 'red' ? '#ff0000' :
-                      clockDigitColor === 'blue' ? '#0000ff' :
-                      clockDigitColor === 'yellow' ? '#ffff00' :
-                      clockDigitColor === 'cyan' ? '#00ffff' :
-                      clockDigitColor === 'magenta' ? '#ff00ff' :
-                      clockDigitColor === 'orange' ? '#ffa500' :
-                      clockDigitColor === 'pink' ? '#ffc0cb' : '#00ff00';
+    const digitColor =
+      clockDigitColor === 'green'
+        ? '#00ff00'
+        : clockDigitColor === 'white'
+        ? '#ffffff'
+        : clockDigitColor === 'black'
+        ? '#000000'
+        : clockDigitColor === 'red'
+        ? '#ff0000'
+        : clockDigitColor === 'blue'
+        ? '#0000ff'
+        : clockDigitColor === 'yellow'
+        ? '#ffff00'
+        : clockDigitColor === 'cyan'
+        ? '#00ffff'
+        : clockDigitColor === 'magenta'
+        ? '#ff00ff'
+        : clockDigitColor === 'orange'
+        ? '#ffa500'
+        : clockDigitColor === 'pink'
+        ? '#ffc0cb'
+        : '#00ff00';
 
     return {
       ...baseStyle,
@@ -471,13 +540,14 @@ const App = () => {
   }, [clockBackground, clockDigitColor]);
 
   const handleNameChange = (text) => setName(text);
-  const handleShowerDurationChange = (value) => setShowerDuration(parseFloat(value));
+  const handleShowerDurationChange = (value) =>
+    setShowerDuration(parseFloat(value));
   const handleAudioSelectChange = (value) => setAudioSelect(value);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
-      
+
       {/* Top Right Icons */}
       <View style={styles.topRightIcons}>
         <TouchableOpacity
@@ -503,7 +573,7 @@ const App = () => {
           ref={nameInputRef}
           style={[
             styles.nameInput,
-            !name.trim() && startButtonPressed && styles.nameInputError
+            !name.trim() && startButtonPressed && styles.nameInputError,
           ]}
           value={name}
           onChangeText={handleNameChange}
@@ -514,15 +584,16 @@ const App = () => {
         />
 
         {/* Timer Display */}
-        <View style={[
-          styles.timerDisplay,
-          getClockFaceStyles(),
-          shouldShowWarning() && styles.warningActive
-        ]}>
-          <Text style={[
-            styles.timerText,
-            { color: getClockFaceStyles().color }
-          ]}>
+        <View
+          style={[
+            styles.timerDisplay,
+            getClockFaceStyles(),
+            shouldShowWarning() && styles.warningActive,
+          ]}
+        >
+          <Text
+            style={[styles.timerText, { color: getClockFaceStyles().color }]}
+          >
             {updateTimerDisplay()}
           </Text>
           {shouldShowWarning() && (
@@ -540,12 +611,18 @@ const App = () => {
             <TouchableOpacity
               style={[styles.controlButton, styles.startButton]}
               onPress={startTimer}
-              disabled={isRunning && !isPaused || (timeLeft === 0 && !isRunning && !name.trim()) || (isPaused && timeLeft === 0)}
+              disabled={
+                (isRunning && !isPaused) ||
+                (timeLeft === 0 && !isRunning && !name.trim()) ||
+                (isPaused && timeLeft === 0)
+              }
             >
               <Icon name="play" size={32} color="white" />
-              <Text style={styles.buttonText}>{isPaused && timeLeft > 0 ? 'Resume' : 'Start'}</Text>
+              <Text style={styles.buttonText}>
+                {isPaused && timeLeft > 0 ? 'Resume' : 'Start'}
+              </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.controlButton, styles.pauseButton]}
               onPress={pauseTimer}
@@ -554,7 +631,7 @@ const App = () => {
               <Icon name="pause" size={32} color="white" />
               <Text style={styles.buttonText}>Pause</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.controlButton, styles.resetButton]}
               onPress={resetTimer}
@@ -574,7 +651,7 @@ const App = () => {
               <Icon name="volume-up" size={32} color="white" />
               <Text style={styles.buttonText}>Sound Alarm</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.controlButton, styles.talkButton]}
               onPress={() => Alert.alert('Talk', 'Talk feature coming soon!')}
@@ -582,7 +659,7 @@ const App = () => {
               <Icon name="microphone" size={32} color="white" />
               <Text style={styles.buttonText}>Talk</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.controlButton, styles.stopButton]}
               onPress={stopEarly}
@@ -592,8 +669,6 @@ const App = () => {
               <Text style={styles.buttonText}>Finished</Text>
             </TouchableOpacity>
           </View>
-
-
         </View>
       </View>
 
@@ -612,43 +687,75 @@ const App = () => {
                 <Icon name="times" size={24} color="#6c757d" />
               </TouchableOpacity>
             </View>
-            
+
             {/* Tab Navigation */}
             <View style={styles.tabContainer}>
               <TouchableOpacity
-                style={[styles.tab, activeSettingsTab === 'general' && styles.activeTab]}
+                style={[
+                  styles.tab,
+                  activeSettingsTab === 'general' && styles.activeTab,
+                ]}
                 onPress={() => setActiveSettingsTab('general')}
               >
-                <Text style={[styles.tabText, activeSettingsTab === 'general' && styles.activeTabText]}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeSettingsTab === 'general' && styles.activeTabText,
+                  ]}
+                >
                   General
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.tab, activeSettingsTab === 'sound' && styles.activeTab]}
+                style={[
+                  styles.tab,
+                  activeSettingsTab === 'sound' && styles.activeTab,
+                ]}
                 onPress={() => setActiveSettingsTab('sound')}
               >
-                <Text style={[styles.tabText, activeSettingsTab === 'sound' && styles.activeTabText]}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeSettingsTab === 'sound' && styles.activeTabText,
+                  ]}
+                >
                   Sound
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.tab, activeSettingsTab === 'appearance' && styles.activeTab]}
+                style={[
+                  styles.tab,
+                  activeSettingsTab === 'appearance' && styles.activeTab,
+                ]}
                 onPress={() => setActiveSettingsTab('appearance')}
               >
-                <Text style={[styles.tabText, activeSettingsTab === 'appearance' && styles.activeTabText]}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeSettingsTab === 'appearance' && styles.activeTabText,
+                  ]}
+                >
                   Appearance
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.tab, activeSettingsTab === 'bluetooth' && styles.activeTab]}
+                style={[
+                  styles.tab,
+                  activeSettingsTab === 'bluetooth' && styles.activeTab,
+                ]}
                 onPress={() => setActiveSettingsTab('bluetooth')}
               >
-                <Text style={[styles.tabText, activeSettingsTab === 'bluetooth' && styles.activeTabText]}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeSettingsTab === 'bluetooth' && styles.activeTabText,
+                  ]}
+                >
                   Bluetooth
                 </Text>
               </TouchableOpacity>
             </View>
-            
+
             <ScrollView style={styles.modalBody}>
               {/* General Tab */}
               {activeSettingsTab === 'general' && (
@@ -663,7 +770,8 @@ const App = () => {
                       maxLength={50}
                     />
                     <Text style={styles.helperText}>
-                      This name will be used to identify this shower timer in the history
+                      This name will be used to identify this shower timer in
+                      the history
                     </Text>
                   </View>
 
@@ -671,25 +779,35 @@ const App = () => {
                     <Text style={styles.settingLabel}>Shower Duration</Text>
                     <View style={styles.pickerContainer}>
                       <ScrollView>
-                        {[0.083, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((duration) => (
-                          <TouchableOpacity
-                            key={duration}
-                            style={[
-                              styles.pickerOption,
-                              showerDuration === duration && styles.pickerOptionSelected
-                            ]}
-                            onPress={() => handleShowerDurationChange(duration)}
-                          >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              showerDuration === duration && styles.pickerOptionTextSelected
-                            ]}>
-                              {duration === 0.083 ? '5 seconds' : 
-                               duration === 20 ? `${duration} minutes (Default)` : 
-                               `${duration} minutes`}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
+                        {[0.083, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map(
+                          (duration) => (
+                            <TouchableOpacity
+                              key={duration}
+                              style={[
+                                styles.pickerOption,
+                                showerDuration === duration &&
+                                  styles.pickerOptionSelected,
+                              ]}
+                              onPress={() =>
+                                handleShowerDurationChange(duration)
+                              }
+                            >
+                              <Text
+                                style={[
+                                  styles.pickerOptionText,
+                                  showerDuration === duration &&
+                                    styles.pickerOptionTextSelected,
+                                ]}
+                              >
+                                {duration === 0.083
+                                  ? '5 seconds'
+                                  : duration === 20
+                                  ? `${duration} minutes (Default)`
+                                  : `${duration} minutes`}
+                              </Text>
+                            </TouchableOpacity>
+                          )
+                        )}
                       </ScrollView>
                     </View>
                   </View>
@@ -703,17 +821,23 @@ const App = () => {
                             key={percentage}
                             style={[
                               styles.pickerOption,
-                              warningPercentage === percentage && styles.pickerOptionSelected
+                              warningPercentage === percentage &&
+                                styles.pickerOptionSelected,
                             ]}
                             onPress={() => setWarningPercentage(percentage)}
                           >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              warningPercentage === percentage && styles.pickerOptionTextSelected
-                            ]}>
-                              {percentage === 'none' ? 'None' : 
-                               percentage === '25' ? `${percentage}% (Default)` : 
-                               `${percentage}%`}
+                            <Text
+                              style={[
+                                styles.pickerOptionText,
+                                warningPercentage === percentage &&
+                                  styles.pickerOptionTextSelected,
+                              ]}
+                            >
+                              {percentage === 'none'
+                                ? 'None'
+                                : percentage === '25'
+                                ? `${percentage}% (Default)`
+                                : `${percentage}%`}
                             </Text>
                           </TouchableOpacity>
                         ))}
@@ -735,22 +859,31 @@ const App = () => {
                             key={sound}
                             style={[
                               styles.pickerOption,
-                              audioSelect === sound && styles.pickerOptionSelected
+                              audioSelect === sound &&
+                                styles.pickerOptionSelected,
                             ]}
                             onPress={() => handleAudioSelectChange(sound)}
                           >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              audioSelect === sound && styles.pickerOptionTextSelected
-                            ]}>
-                              {sound === 'bell' ? 'Bell (Default)' : 
-                               sound.charAt(0).toUpperCase() + sound.slice(1)}
+                            <Text
+                              style={[
+                                styles.pickerOptionText,
+                                audioSelect === sound &&
+                                  styles.pickerOptionTextSelected,
+                              ]}
+                            >
+                              {sound === 'bell'
+                                ? 'Bell (Default)'
+                                : sound.charAt(0).toUpperCase() +
+                                  sound.slice(1)}
                             </Text>
                           </TouchableOpacity>
                         ))}
                       </ScrollView>
                     </View>
-                    <TouchableOpacity style={styles.testButton} onPress={playAlertSound}>
+                    <TouchableOpacity
+                      style={styles.testButton}
+                      onPress={playAlertSound}
+                    >
                       <Icon name="volume-up" size={16} color="white" />
                       <Text style={styles.testButtonText}>Test Sound</Text>
                     </TouchableOpacity>
@@ -765,23 +898,32 @@ const App = () => {
                             key={sound}
                             style={[
                               styles.pickerOption,
-                              warningSound === sound && styles.pickerOptionSelected
+                              warningSound === sound &&
+                                styles.pickerOptionSelected,
                             ]}
                             onPress={() => setWarningSound(sound)}
                           >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              warningSound === sound && styles.pickerOptionTextSelected
-                            ]}>
-                              {sound === 'bell' ? 'Bell (Default)' : 
-                               sound.charAt(0).toUpperCase() + sound.slice(1)}
+                            <Text
+                              style={[
+                                styles.pickerOptionText,
+                                warningSound === sound &&
+                                  styles.pickerOptionTextSelected,
+                              ]}
+                            >
+                              {sound === 'bell'
+                                ? 'Bell (Default)'
+                                : sound.charAt(0).toUpperCase() +
+                                  sound.slice(1)}
                             </Text>
                           </TouchableOpacity>
                         ))}
                       </ScrollView>
                     </View>
-                    <TouchableOpacity 
-                      style={[styles.testButton, warningPercentage === 'none' && styles.disabledButton]} 
+                    <TouchableOpacity
+                      style={[
+                        styles.testButton,
+                        warningPercentage === 'none' && styles.disabledButton,
+                      ]}
                       onPress={playWarningSound}
                       disabled={warningPercentage === 'none'}
                     >
@@ -789,7 +931,9 @@ const App = () => {
                       <Text style={styles.testButtonText}>Test Sound</Text>
                     </TouchableOpacity>
                     {warningPercentage === 'none' && (
-                      <Text style={styles.helperText}>Disabled when Warning Duration is set to None</Text>
+                      <Text style={styles.helperText}>
+                        Disabled when Warning Duration is set to None
+                      </Text>
                     )}
                   </View>
                 </View>
@@ -802,25 +946,43 @@ const App = () => {
                     <Text style={styles.settingLabel}>Background Style</Text>
                     <View style={styles.pickerContainer}>
                       <ScrollView>
-                        {['black', 'white', 'gradient1', 'gradient2', 'gradient3', 'ambient'].map((bg) => (
+                        {[
+                          'black',
+                          'white',
+                          'gradient1',
+                          'gradient2',
+                          'gradient3',
+                          'ambient',
+                        ].map((bg) => (
                           <TouchableOpacity
                             key={bg}
                             style={[
                               styles.pickerOption,
-                              clockBackground === bg && styles.pickerOptionSelected
+                              clockBackground === bg &&
+                                styles.pickerOptionSelected,
                             ]}
                             onPress={() => setClockBackground(bg)}
                           >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              clockBackground === bg && styles.pickerOptionTextSelected
-                            ]}>
-                              {bg === 'black' ? 'Black (Default)' :
-                               bg === 'white' ? 'White' :
-                               bg === 'gradient1' ? 'Blue Gradient' :
-                               bg === 'gradient2' ? 'Purple Gradient' :
-                               bg === 'gradient3' ? 'Cyan Gradient' :
-                               bg === 'ambient' ? 'Ambient' : bg}
+                            <Text
+                              style={[
+                                styles.pickerOptionText,
+                                clockBackground === bg &&
+                                  styles.pickerOptionTextSelected,
+                              ]}
+                            >
+                              {bg === 'black'
+                                ? 'Black (Default)'
+                                : bg === 'white'
+                                ? 'White'
+                                : bg === 'gradient1'
+                                ? 'Blue Gradient'
+                                : bg === 'gradient2'
+                                ? 'Purple Gradient'
+                                : bg === 'gradient3'
+                                ? 'Cyan Gradient'
+                                : bg === 'ambient'
+                                ? 'Ambient'
+                                : bg}
                             </Text>
                           </TouchableOpacity>
                         ))}
@@ -832,21 +994,38 @@ const App = () => {
                     <Text style={styles.settingLabel}>Digit Color</Text>
                     <View style={styles.pickerContainer}>
                       <ScrollView>
-                        {['green', 'white', 'black', 'red', 'blue', 'yellow', 'cyan', 'magenta', 'orange', 'pink'].map((color) => (
+                        {[
+                          'green',
+                          'white',
+                          'black',
+                          'red',
+                          'blue',
+                          'yellow',
+                          'cyan',
+                          'magenta',
+                          'orange',
+                          'pink',
+                        ].map((color) => (
                           <TouchableOpacity
                             key={color}
                             style={[
                               styles.pickerOption,
-                              clockDigitColor === color && styles.pickerOptionSelected
+                              clockDigitColor === color &&
+                                styles.pickerOptionSelected,
                             ]}
                             onPress={() => setClockDigitColor(color)}
                           >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              clockDigitColor === color && styles.pickerOptionTextSelected
-                            ]}>
-                              {color === 'green' ? 'Green (Default)' :
-                               color.charAt(0).toUpperCase() + color.slice(1)}
+                            <Text
+                              style={[
+                                styles.pickerOptionText,
+                                clockDigitColor === color &&
+                                  styles.pickerOptionTextSelected,
+                              ]}
+                            >
+                              {color === 'green'
+                                ? 'Green (Default)'
+                                : color.charAt(0).toUpperCase() +
+                                  color.slice(1)}
                             </Text>
                           </TouchableOpacity>
                         ))}
@@ -858,21 +1037,34 @@ const App = () => {
                     <Text style={styles.settingLabel}>Color Scheme</Text>
                     <View style={styles.pickerContainer}>
                       <ScrollView>
-                        {['default', 'neon', 'fire', 'ocean', 'sunset', 'rainbow'].map((scheme) => (
+                        {[
+                          'default',
+                          'neon',
+                          'fire',
+                          'ocean',
+                          'sunset',
+                          'rainbow',
+                        ].map((scheme) => (
                           <TouchableOpacity
                             key={scheme}
                             style={[
                               styles.pickerOption,
-                              clockColorScheme === scheme && styles.pickerOptionSelected
+                              clockColorScheme === scheme &&
+                                styles.pickerOptionSelected,
                             ]}
                             onPress={() => setClockColorScheme(scheme)}
                           >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              clockColorScheme === scheme && styles.pickerOptionTextSelected
-                            ]}>
-                              {scheme === 'default' ? 'Individual Colors (Default)' :
-                               scheme.charAt(0).toUpperCase() + scheme.slice(1)}
+                            <Text
+                              style={[
+                                styles.pickerOptionText,
+                                clockColorScheme === scheme &&
+                                  styles.pickerOptionTextSelected,
+                              ]}
+                            >
+                              {scheme === 'default'
+                                ? 'Individual Colors (Default)'
+                                : scheme.charAt(0).toUpperCase() +
+                                  scheme.slice(1)}
                             </Text>
                           </TouchableOpacity>
                         ))}
@@ -884,25 +1076,33 @@ const App = () => {
                     <Text style={styles.settingLabel}>Digital Font</Text>
                     <View style={styles.pickerContainer}>
                       <ScrollView>
-                        {['Orbitron', 'Share Tech Mono', 'VT323'].map((font) => (
-                          <TouchableOpacity
-                            key={font}
-                            style={[
-                              styles.pickerOption,
-                              clockFont === font && styles.pickerOptionSelected
-                            ]}
-                            onPress={() => setClockFont(font)}
-                          >
-                            <Text style={[
-                              styles.pickerOptionText,
-                              clockFont === font && styles.pickerOptionTextSelected
-                            ]}>
-                              {font === 'Orbitron' ? 'Orbitron (Modern Digital) (Default)' :
-                               font === 'Share Tech Mono' ? 'Share Tech Mono (Classic)' :
-                               'VT323 (Retro)'}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
+                        {['Orbitron', 'Share Tech Mono', 'VT323'].map(
+                          (font) => (
+                            <TouchableOpacity
+                              key={font}
+                              style={[
+                                styles.pickerOption,
+                                clockFont === font &&
+                                  styles.pickerOptionSelected,
+                              ]}
+                              onPress={() => setClockFont(font)}
+                            >
+                              <Text
+                                style={[
+                                  styles.pickerOptionText,
+                                  clockFont === font &&
+                                    styles.pickerOptionTextSelected,
+                                ]}
+                              >
+                                {font === 'Orbitron'
+                                  ? 'Orbitron (Modern Digital) (Default)'
+                                  : font === 'Share Tech Mono'
+                                  ? 'Share Tech Mono (Classic)'
+                                  : 'VT323 (Retro)'}
+                              </Text>
+                            </TouchableOpacity>
+                          )
+                        )}
                       </ScrollView>
                     </View>
                   </View>
@@ -915,7 +1115,8 @@ const App = () => {
                   <View style={styles.infoAlert}>
                     <Icon name="info-circle" size={20} color="#0c5460" />
                     <Text style={styles.infoText}>
-                      Bluetooth functionality requires additional setup and hardware support.
+                      Bluetooth functionality requires additional setup and
+                      hardware support.
                     </Text>
                   </View>
 
@@ -929,27 +1130,32 @@ const App = () => {
                   <View style={styles.settingItem}>
                     <Text style={styles.settingLabel}>Connected Devices</Text>
                     <View style={styles.statusContainer}>
-                      <Text style={styles.statusText}>No devices connected</Text>
+                      <Text style={styles.statusText}>
+                        No devices connected
+                      </Text>
                     </View>
                   </View>
 
-                  <TouchableOpacity style={[styles.scanButton, styles.disabledButton]} disabled>
+                  <TouchableOpacity
+                    style={[styles.scanButton, styles.disabledButton]}
+                    disabled
+                  >
                     <Icon name="bluetooth" size={16} color="#6c757d" />
                     <Text style={styles.scanButtonText}>Scan for Devices</Text>
                   </TouchableOpacity>
                 </View>
               )}
             </ScrollView>
-            
+
             <View style={styles.modalFooter}>
               <View style={styles.footerContent}>
                 <TouchableOpacity
-                  style={styles.resetButton}
-                  onPress={resetSettings}
-                >
-                  <Text style={styles.resetButtonText}>Reset Settings</Text>
+                                  style={styles.settingsResetButton}
+                onPress={resetSettings}
+              >
+                <Text style={styles.resetButtonText}>Reset Settings</Text>
                 </TouchableOpacity>
-                
+
                 <View style={styles.footerButtons}>
                   <TouchableOpacity
                     style={styles.modalButton}
@@ -965,7 +1171,7 @@ const App = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              
+
               <Text style={styles.versionText}>Version 1.0.0</Text>
             </View>
           </View>
@@ -987,7 +1193,7 @@ const App = () => {
                 <Icon name="times" size={24} color="#6c757d" />
               </TouchableOpacity>
             </View>
-            
+
             <ScrollView style={styles.modalBody}>
               {showerHistory.length === 0 ? (
                 <Text style={styles.noHistoryText}>No shower history yet</Text>
@@ -996,7 +1202,8 @@ const App = () => {
                   <View key={index} style={styles.historyItem}>
                     <Text style={styles.historyName}>{record.name}</Text>
                     <Text style={styles.historyTime}>
-                      {formatDateTime(record.startTime)} - {formatDateTime(record.endTime)}
+                      {formatDateTime(record.startTime)} -{' '}
+                      {formatDateTime(record.endTime)}
                     </Text>
                     <Text style={styles.historyDuration}>
                       Duration: {record.duration}
@@ -1009,7 +1216,7 @@ const App = () => {
                 ))
               )}
             </ScrollView>
-            
+
             <View style={styles.modalFooter}>
               <View style={styles.footerContent}>
                 <TouchableOpacity
@@ -1335,7 +1542,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  resetButton: {
+  settingsResetButton: {
     backgroundColor: '#dc3545',
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -1410,4 +1617,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App; 
+export default App;

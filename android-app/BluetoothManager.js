@@ -5,19 +5,28 @@ class BluetoothManager {
     this.isConnected = false;
     this.device = null;
     this.isSupported = Platform.OS === 'android';
-    
+
     // For Android, we'll use a native module approach
     this.bluetoothModule = NativeModules.BluetoothSerial;
     this.eventEmitter = new NativeEventEmitter(this.bluetoothModule);
-    
+
     this.setupEventListeners();
   }
 
   setupEventListeners() {
     if (this.eventEmitter) {
-      this.eventEmitter.addListener('bluetoothConnected', this.onConnected.bind(this));
-      this.eventEmitter.addListener('bluetoothDisconnected', this.onDisconnected.bind(this));
-      this.eventEmitter.addListener('bluetoothDataReceived', this.onDataReceived.bind(this));
+      this.eventEmitter.addListener(
+        'bluetoothConnected',
+        this.onConnected.bind(this)
+      );
+      this.eventEmitter.addListener(
+        'bluetoothDisconnected',
+        this.onDisconnected.bind(this)
+      );
+      this.eventEmitter.addListener(
+        'bluetoothDataReceived',
+        this.onDataReceived.bind(this)
+      );
       this.eventEmitter.addListener('bluetoothError', this.onError.bind(this));
     }
   }
@@ -61,7 +70,7 @@ class BluetoothManager {
     const message = {
       command: command,
       ...data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     const jsonString = JSON.stringify(message) + '\n';
@@ -97,7 +106,7 @@ class BluetoothManager {
     await this.sendCommand('setTime', {
       hours: now.getHours(),
       minutes: now.getMinutes(),
-      seconds: now.getSeconds()
+      seconds: now.getSeconds(),
     });
   }
 
@@ -130,7 +139,7 @@ class BluetoothManager {
     return {
       isSupported: this.isSupported,
       isConnected: this.isConnected,
-      deviceName: this.device ? this.device.name : null
+      deviceName: this.device ? this.device.name : null,
     };
   }
 
@@ -144,4 +153,4 @@ class BluetoothManager {
   }
 }
 
-export default BluetoothManager; 
+export default BluetoothManager;
