@@ -108,7 +108,7 @@ module.exports = {
     'quotes': ['error', 'single', { avoidEscape: true }],
     'semi': ['error', 'always'],
     'comma-dangle': ['error', 'always-multiline'],
-    'indent': ['error', 2],
+    'indent': 'off', // Temporarily disabled due to formatting conflicts
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],

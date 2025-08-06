@@ -5,12 +5,15 @@ A React-based web application for managing shower timers with history tracking a
 ## Features
 
 - **Timer Management**: Start, pause, resume, and stop shower timers
-- **Name Input**: Enter names for individual shower sessions
+- **Name Input**: Enter names for individual shower sessions with marquee effect for long names
 - **Customizable Duration**: Set shower duration from 5 seconds to 55 minutes
-- **Audio Alerts**: Choose from bell, buzzer, or chime sounds
+- **Audio Alerts**: Choose from bell, buzzer, or chime sounds for both alarm and warning
 - **History Tracking**: View detailed shower history with timestamps
-- **Settings Management**: Configure timer duration and alert sounds
+- **Settings Management**: Comprehensive settings with tabbed interface
+- **Clock Face Customization**: Customize background, digit colors, fonts, and color schemes
+- **Warning System**: Configurable warning duration with custom sounds
 - **Bluetooth Integration**: Connect to external Arduino displays
+- **Additional Controls**: Reset timer, sound alarm, and talk functionality
 - **Responsive Design**: Works on desktop and mobile browsers
 
 ## Quick Start
@@ -45,17 +48,36 @@ A React-based web application for managing shower timers with history tracking a
 
 ### Basic Timer Operation
 
-1. **Enter a name** in the input field
+1. **Enter a name** in the input field (long names will scroll when timer starts)
 2. **Configure settings** (optional):
    - Click the settings icon (⚙️) in the bottom right
-   - Select shower duration
-   - Choose alert sound
+   - Use the tabbed interface to organize settings
+   - Set shower name, timer duration, sounds, appearance, and Bluetooth
 3. **Start the timer** by clicking "Start"
 4. **Control the timer**:
    - Pause/Resume: Temporarily stop or continue
    - End: Stop early and record the time
    - Reset: Completely stop the timer
+   - Sound Alarm: Press and hold to test alarm sound
 5. **View history** by clicking the history icon (📚)
+
+### Customization Features
+
+#### General Settings
+- **Shower Name**: Set a name for the shower timer to identify it in history
+- **Shower Duration**: Configure timer length from 5 seconds to 55 minutes
+- **Warning Duration**: Set warning percentage (25%, 50%, 75%, none)
+
+#### Clock Face Customization
+- **Background Styles**: White, black, gradients, and ambient effects
+- **Digit Colors**: Green (default), white, black, red, blue, yellow, cyan, magenta, orange, pink
+- **Color Schemes**: Individual colors, neon, fire, ocean, sunset, rainbow with moving gradients
+- **Digital Fonts**: Orbitron (default), modern digital clock appearance
+
+#### Warning System
+- **Warning Duration**: Set warning percentage (25%, 50%, 75%, none)
+- **Warning Sound**: Choose separate sound for warning duration
+- **Visual Indicators**: Clock face changes appearance during warning period
 
 ### Bluetooth Integration
 
@@ -107,15 +129,20 @@ web-app/
 ### Timer Settings
 
 - **Duration Options**: 5 seconds, 10-55 minutes (5-minute increments)
-- **Audio Options**: Bell, Buzzer, Chime
-- **Default Duration**: 10 minutes
-- **Default Audio**: Bell
+- **Alarm Sound Options**: Bell (default), Buzzer, Chime
+- **Warning Sound Options**: Bell (default), Buzzer, Chime
+- **Default Duration**: 20 minutes
+- **Default Warning**: 25% of duration
+- **Default Background**: Black
+- **Default Digit Color**: Green
+- **Default Font**: Orbitron
 
 ### Local Storage
 
 The app uses browser local storage to persist:
 - Timer history
-- User settings (duration, audio preference)
+- User settings (duration, alarm sound, warning sound, warning percentage)
+- Clock face customization (background, digit color, color scheme, font)
 - Last shower end time
 
 ### Bluetooth Configuration
